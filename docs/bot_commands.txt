@@ -1,0 +1,31 @@
+# 호요봇 제어 명령어 모음
+
+## 봇 시작
+Start-ScheduledTask -TaskName "HoyoBot_AutoStart"
+
+## 봇 중지
+Stop-ScheduledTask -TaskName "HoyoBot_AutoStart"
+taskkill /F /IM python.exe
+
+## 봇 상태 확인
+Get-ScheduledTask -TaskName "HoyoBot_AutoStart"
+Get-Process python -ErrorAction SilentlyContinue
+
+## 로그 보기 (최근 50줄)
+Get-Content bot.log -Tail 50 -Encoding UTF8
+
+## 로그 실시간 모니터링
+Get-Content bot.log -Wait -Tail 20 -Encoding UTF8
+
+## 에러 로그 보기
+Get-Content bot_error.log -Tail 50 -Encoding UTF8
+
+## 작업 스케줄러 정보
+Get-ScheduledTaskInfo -TaskName "HoyoBot_AutoStart"
+
+## 서비스 제거 (관리자 권한)
+.\uninstall_service.ps1
+
+
+
+
