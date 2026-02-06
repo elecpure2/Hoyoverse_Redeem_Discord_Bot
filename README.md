@@ -4,11 +4,11 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-yellow?style=flat-square&logo=python)
 ![Discord](https://img.shields.io/badge/Discord.py-2.3+-5865F2?style=flat-square&logo=discord)
 
-호요버스 게임(원신, 스타레일, 젠레스 존 제로) 및 명조 플레이어를 위한 디스코드 봇입니다.
+호요버스 게임(원신, 스타레일, 젠레스 존 제로), 명조, 명일방주: 엔드필드 플레이어를 위한 디스코드 봇입니다.
 
 ## ✨ 주요 기능
 
-- **🎁 리딤코드 자동 알림**: 새로운 리딤코드가 나오면 자동으로 알림
+- **🎁 리딤코드 자동 알림**: 새로운 리딤코드가 나오면 자동으로 알림 (원신, 스타레일, 젠레스, 엔드필드)
 - **🎬 유튜브 알림**: 공식 유튜브 채널 새 영상 알림
 - **🔮 오늘의 운세**: 캐릭터 테마의 재미있는 운세
 - **🎰 가챠 시뮬레이터**: 뽑기 시뮬레이션
@@ -124,6 +124,9 @@ pip install git+https://github.com/seriaati/hakushin-py.git
 
 ### 명령어가 작동하지 않음
 → MESSAGE CONTENT INTENT가 활성화되어 있는지 확인하세요.
+
+### 명조 리딤코드가 안 나와요
+→ ⚠️ 명조 코드 알림 기능은 현재 **임시 중단** 상태입니다. (외부 사이트 접근 차단 문제)
 
 ## 💬 문의 및 지원
 

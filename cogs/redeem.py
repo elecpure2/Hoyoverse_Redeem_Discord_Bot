@@ -31,7 +31,8 @@ async def fetch_hoyo_codes(api_url):
 async def fetch_wuwa_codes():
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(WUWA_CONFIG["wiki_url"], timeout=aiohttp.ClientTimeout(total=30)) as resp:
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+            async with session.get(WUWA_CONFIG["wiki_url"], timeout=aiohttp.ClientTimeout(total=30), headers=headers) as resp:
                 if resp.status != 200:
                     print(f"명조 코드 가져오기 실패: HTTP {resp.status}")
                     return []
