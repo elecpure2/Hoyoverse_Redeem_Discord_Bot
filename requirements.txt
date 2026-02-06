@@ -4,4 +4,4 @@ beautifulsoup4>=4.12.0
 lxml>=4.9.0
 google-generativeai>=0.3.0
 python-dotenv
-# hakushin: pip install git+https://github.com/thesadru/hakushin.git
+# hakushin (선택사항): pip install git+https://github.com/seriaati/hakushin-py.git

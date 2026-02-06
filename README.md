@@ -64,6 +64,23 @@
 
 > 💡 봇을 종료하려면 창을 닫거나 `Ctrl+C`를 누르세요.
 
+### 6단계: 선택 기능 설치 (Optional)
+
+#### 📊 캐릭터/무기/성유물 정보 기능
+
+캐릭터 정보(`!캐릭터`), 무기 정보(`!무기`) 등의 기능을 사용하려면 다음 명령어를 실행하세요:
+
+```bash
+pip install git+https://github.com/seriaati/hakushin-py.git
+```
+
+> ⚠️ **오류 발생 시:**
+> ```
+> ❌ cogs.hoyo_characters는 hakushin 모듈이 필요합니다. (선택사항)
+> ❌ ModuleNotFoundError: No module named 'hakushin'
+> ```
+> 위 에러가 표시되면 cmd 또는 PowerShell에서 위 명령어를 실행한 후 봇을 재시작하세요.
+
 ---
 
 ## 📝 기본 명령어
