@@ -14,7 +14,7 @@ class NotifyTypeSelect(discord.ui.Select):
         self.channel_id = channel_id
         hidden_types = [
             "genshin_yt_community", "starrail_yt_community", "zzz_yt_community", "wuwa_yt_community",
-            "petitplanet_yt_community", "varsapura_yt_community", "nexusanima_yt_community"
+            "endfield_yt_community", "petitplanet_yt_community", "varsapura_yt_community", "nexusanima_yt_community"
         ]
         options = []
         for key, info in NOTIFY_TYPES.items():

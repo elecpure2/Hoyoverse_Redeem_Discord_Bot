@@ -76,12 +76,20 @@ class YouTube(commands.Cog):
             "넥서스아니마": "nexusanima_yt",
             "넥서스": "nexusanima_yt",
             "nexus": "nexusanima_yt",
+            "nexus": "nexusanima_yt",
+            "엔드필드": "endfield_yt",
+            "endfield": "endfield_yt",
         }
         
-        yt_key = channel_map.get(channel.lower(), "genshin_yt")
+        yt_key = channel_map.get(channel.lower())
+        
+        if not yt_key:
+            available = ", ".join(set(channel_map.keys()))
+            await ctx.send(f"❌ 채널을 찾을 수 없어요!\n가능한 채널: {available}")
+            return
         
         if yt_key not in YOUTUBE_CHANNELS:
-            await ctx.send("❌ 유효하지 않은 채널이에요!")
+            await ctx.send("❌ 설정(config)에 없는 채널이에요!")
             return
         
         yt_info = YOUTUBE_CHANNELS[yt_key]

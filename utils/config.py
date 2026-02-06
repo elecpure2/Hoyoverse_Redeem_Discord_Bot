@@ -7,6 +7,8 @@ DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
+TEST_CHANNEL_ID = 1447088802312093769
+GAME_CHANNEL_ID = 1088424836944105482
 
 DATA_FILE = "data/user_data.json"
 SENT_CODES_FILE = "data/sent_codes.json"
@@ -16,6 +18,7 @@ SENT_VIDEOS_FILE = "data/sent_videos.json"
 
 HOYO_GAME_CONFIGS = {
     "genshin": {
+        "channel_id": 1103924217138913381,
         "api_url": "https://hoyo-codes.seria.moe/codes?game=genshin",
         "redeem_url": "https://genshin.hoyoverse.com/ko/gift?code=",
         "name": "원신",
@@ -23,6 +26,7 @@ HOYO_GAME_CONFIGS = {
         "currency_name": "원석",
     },
     "hkrpg": {
+        "channel_id": 1103927150677073962,
         "api_url": "https://hoyo-codes.seria.moe/codes?game=hkrpg",
         "redeem_url": "https://hsr.hoyoverse.com/gift?code=",
         "name": "붕괴: 스타레일",
@@ -30,6 +34,7 @@ HOYO_GAME_CONFIGS = {
         "currency_name": "성옥",
     },
     "nap": {
+        "channel_id": 1256212554556899431,
         "api_url": "https://hoyo-codes.seria.moe/codes?game=nap",
         "redeem_url": "https://zenless.hoyoverse.com/redemption?code=",
         "name": "젠레스 존 제로",
@@ -39,10 +44,18 @@ HOYO_GAME_CONFIGS = {
 }
 
 WUWA_CONFIG = {
+    "channel_id": 1243618955378163813,
     "wiki_url": "https://wutheringwaves.fandom.com/wiki/Redemption_Code",
     "name": "명조",
     "currency_keyword": "astrite",
     "currency_name": "성정",
+}
+
+ENDFIELD_CONFIG = {
+    "url": "https://game8.co/games/Arknights-Endfield/archives/571509",
+    "name": "명일방주: 엔드필드",
+    "currency_keyword": "oroberyl",
+    "currency_name": "오로베릴",
 }
 
 YOUTUBE_CHANNELS = {
@@ -80,6 +93,11 @@ YOUTUBE_CHANNELS = {
         "channel_id": "UCR_M7m-eF0cXa3nrdNHsp6g",
         "name": "넥서스아니마",
         "emoji": "💫"
+    },
+    "endfield_yt": {
+        "channel_id": "UCIf9gYpmmIJV7flBhUhuqYQ",
+        "name": "엔드필드",
+        "emoji": "🏗️"
     }
 }
 
@@ -111,10 +129,12 @@ NOTIFY_TYPES = {
     "hkrpg": {"name": "스타레일 코드", "emoji": "🚂"},
     "nap": {"name": "젠레스 코드", "emoji": "📺"},
     "wuwa": {"name": "명조 코드", "emoji": "🌊"},
+    "endfield": {"name": "엔드필드 코드", "emoji": "🏗️"},
     "genshin_yt": {"name": "원신 유튜브", "emoji": "🎬"},
     "starrail_yt": {"name": "스타레일 유튜브", "emoji": "🎬"},
     "zzz_yt": {"name": "젠레스 유튜브", "emoji": "🎬"},
     "wuwa_yt": {"name": "명조 유튜브", "emoji": "🎬"},
+    "endfield_yt": {"name": "엔드필드 유튜브", "emoji": "🎬"},
     "petitplanet_yt": {"name": "쁘띠플레닛", "emoji": "🎮"},
     "varsapura_yt": {"name": "Varsapura", "emoji": "🎬"},
     "nexusanima_yt": {"name": "넥서스아니마", "emoji": "💫"},
@@ -122,6 +142,7 @@ NOTIFY_TYPES = {
     "starrail_yt_community": {"name": "스타레일 커뮤니티", "emoji": "📢"},
     "zzz_yt_community": {"name": "젠레스 커뮤니티", "emoji": "📢"},
     "wuwa_yt_community": {"name": "명조 커뮤니티", "emoji": "📢"},
+    "endfield_yt_community": {"name": "엔드필드 커뮤니티", "emoji": "📢"},
     "petitplanet_yt_community": {"name": "쁘띠플레닛 커뮤니티", "emoji": "📢"},
     "varsapura_yt_community": {"name": "Varsapura 커뮤니티", "emoji": "📢"},
     "nexusanima_yt_community": {"name": "넥서스아니마 커뮤니티", "emoji": "📢"},

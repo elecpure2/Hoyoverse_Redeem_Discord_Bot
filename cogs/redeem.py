@@ -3,13 +3,14 @@ from discord.ext import commands, tasks
 import aiohttp
 import re
 from bs4 import BeautifulSoup
-from utils.config import HOYO_GAME_CONFIGS, WUWA_CONFIG
+from utils.config import HOYO_GAME_CONFIGS, WUWA_CONFIG, ENDFIELD_CONFIG
 from utils.data import load_sent_codes, save_sent_codes, get_channels_for_type
 from cogs.settings import get_guild_settings
 
 _loaded_codes = load_sent_codes()
 already_sent_codes = {game: _loaded_codes.get(game, set()) for game in HOYO_GAME_CONFIGS}
 already_sent_codes["wuwa"] = _loaded_codes.get("wuwa", set())
+already_sent_codes["endfield"] = _loaded_codes.get("endfield", set())
 
 async def fetch_hoyo_codes(api_url):
     try:
@@ -65,6 +66,53 @@ async def fetch_wuwa_codes():
                 return codes
     except Exception as e:
         print(f"명조 코드 가져오기 중 예외 발생: {e}")
+        return []
+
+async def fetch_endfield_codes():
+    try:
+        async with aiohttp.ClientSession() as session:
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+            async with session.get(ENDFIELD_CONFIG["url"], timeout=aiohttp.ClientTimeout(total=30), headers=headers) as resp:
+                if resp.status != 200:
+                    print(f"엔드필드 코드 가져오기 실패: HTTP {resp.status}")
+                    return []
+                html = await resp.text()
+                soup = BeautifulSoup(html, 'lxml')
+                
+                codes = []
+                # Game8 structure: Use all elements with class 'a-clipboard__textInput'
+                # These inputs contain the code value.
+                inputs = soup.find_all('input', class_='a-clipboard__textInput')
+                
+                for inp in inputs:
+                    code = inp.get('value', '').strip()
+                    if code and len(code) > 3:
+                        # Try to find rewards in the same table row if possible
+                        # Game8 tables usually have Code in one cell and Reward in another.
+                        reward = "출시 기념 보상"
+                        try:
+                            # Search for reward text in the neighboring cells
+                            parent_td = inp.find_parent('td')
+                            if parent_td:
+                                row = parent_td.find_parent('tr')
+                                if row:
+                                    cells = row.find_all('td')
+                                    if len(cells) >= 2:
+                                        # Usually Reward is in the second or third cell
+                                        reward_text = cells[1].get_text(strip=True)
+                                        if reward_text and reward_text != code:
+                                            reward = reward_text
+                        except:
+                            pass
+                            
+                        codes.append({
+                            "code": code,
+                            "rewards": reward
+                        })
+                
+                return codes
+    except Exception as e:
+        print(f"엔드필드 코드 가져오기 중 예외 발생: {e}")
         return []
 
 def extract_currency_amount(reward, currency_keyword, currency_name):
@@ -192,6 +240,41 @@ class Redeem(commands.Cog):
             if new_list:
                 print(f"[{WUWA_CONFIG['name']}] 새 코드 전송:", [c.get("code") for c in new_list])
         
+        # === Arknights: Endfield ===
+        endfield_channels = get_channels_for_type(guild_settings, "endfield")
+        if endfield_channels:
+            codes = await fetch_endfield_codes()
+            new_list = []
+            for item in codes:
+                code = item.get("code")
+                if not code: continue
+                if code not in already_sent_codes["endfield"]:
+                    already_sent_codes["endfield"].add(code)
+                    new_list.append(item)
+                    codes_updated = True
+            
+            for item in new_list:
+                code = item.get("code")
+                reward = item.get("rewards", "")
+                currency_info = extract_currency_amount(
+                    reward, 
+                    ENDFIELD_CONFIG["currency_keyword"], 
+                    ENDFIELD_CONFIG["currency_name"]
+                )
+                msg = f"🎁 **{ENDFIELD_CONFIG['name']}**\n코드: `{code}`"
+                if currency_info:
+                    msg += f" - {currency_info}"
+                
+                for channel_id in endfield_channels:
+                    channel = self.bot.get_channel(channel_id)
+                    if channel:
+                        try:
+                            await channel.send(msg)
+                        except Exception as e:
+                            print(f"엔드필드 알림 전송 실패: {e}")
+            if new_list:
+                print(f"[{ENDFIELD_CONFIG['name']}] 새 코드 전송:", [c.get("code") for c in new_list])
+
         if codes_updated:
             save_sent_codes(already_sent_codes)
     
@@ -216,6 +299,13 @@ class Redeem(commands.Cog):
             if code:
                 already_sent_codes["wuwa"].add(code)
         print(f"  [{WUWA_CONFIG['name']}] 기존 코드 {len(wuwa_codes)}개 등록")
+        
+        endfield_codes = await fetch_endfield_codes()
+        for item in endfield_codes:
+            code = item.get("code")
+            if code:
+                already_sent_codes["endfield"].add(code)
+        print(f"  [{ENDFIELD_CONFIG['name']}] 기존 코드 {len(endfield_codes)}개 등록")
         
         save_sent_codes(already_sent_codes)
         print("[리딤코드] 초기화 완료! 이후 새 코드만 알림됩니다.")
