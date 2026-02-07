@@ -2,8 +2,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import aiohttp
-from utils.config import AVATAR_ID_TO_KR, AVATAR_ICON_NAMES, COSTUME_ART_NAMES, CHARACTER_NAME_TO_ENKA
+from utils.config import AVATAR_ICON_NAMES, COSTUME_ART_NAMES, CHARACTER_NAME_TO_ENKA, AVATAR_ID_TO_KR
 from utils.data import load_uid_data, save_uid_data
+from utils.enka_locale import get_character_name_kr
 
 class CharacterSelect(discord.ui.Select):
     def __init__(self, characters, uid, bot):
@@ -16,7 +17,7 @@ class CharacterSelect(discord.ui.Select):
     
     async def callback(self, interaction: discord.Interaction):
         char_id = int(self.values[0])
-        char_name = AVATAR_ID_TO_KR.get(char_id, f"캐릭터_{char_id}")
+        char_name = await get_character_name_kr(char_id)
         await interaction.response.send_message(f"🔍 **{char_name}** 빌드를 불러오는 중...", ephemeral=True)
         await show_build_for_uid(interaction.channel, interaction.user, self.uid, char_name, char_id)
 
@@ -49,7 +50,7 @@ async def show_build_for_uid(channel, user, uid, char_name, target_avatar_id=Non
         if target_avatar_id and avatar_id == target_avatar_id:
             found_avatar = avatar
             break
-        kr_name = AVATAR_ID_TO_KR.get(avatar_id, "")
+        kr_name = await get_character_name_kr(avatar_id)
         if kr_name == char_name or char_name in kr_name:
             found_avatar = avatar
             break
@@ -59,7 +60,7 @@ async def show_build_for_uid(channel, user, uid, char_name, target_avatar_id=Non
         return
     
     avatar_id = found_avatar.get("avatarId", 0)
-    char_kr = AVATAR_ID_TO_KR.get(avatar_id, char_name)
+    char_kr = await get_character_name_kr(avatar_id) if avatar_id else char_name
     
     player_info = data.get("playerInfo", {})
     nickname = player_info.get("nickname", "알 수 없음")
@@ -275,7 +276,7 @@ class Enka(commands.Cog):
         characters = []
         for avatar in avatar_list:
             avatar_id = avatar.get("avatarId", 0)
-            kr_name = AVATAR_ID_TO_KR.get(avatar_id, f"캐릭터_{avatar_id}")
+            kr_name = await get_character_name_kr(avatar_id)
             characters.append((avatar_id, kr_name))
         
         embed = discord.Embed(
@@ -337,7 +338,7 @@ class Enka(commands.Cog):
         characters = []
         for avatar in avatar_list:
             avatar_id = avatar.get("avatarId", 0)
-            kr_name = AVATAR_ID_TO_KR.get(avatar_id, f"캐릭터_{avatar_id}")
+            kr_name = await get_character_name_kr(avatar_id)
             characters.append((avatar_id, kr_name))
         
         embed = discord.Embed(
