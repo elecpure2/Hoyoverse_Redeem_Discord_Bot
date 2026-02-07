@@ -183,3 +183,9 @@ cython_debug/
 # Bot data files (contains user/server specific data)
 data/*.json
 !data/*.example.json
+
+# Local sync script
+sync_to_local.bat
+
+# Enka locale cache
+data/cache/
