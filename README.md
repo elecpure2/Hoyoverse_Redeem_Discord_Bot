@@ -83,6 +83,12 @@ pip install git+https://github.com/seriaati/hakushin-py.git
 
 ---
 
+## 📺 사용 방법
+
+**[호요봇 사용법 영상 보러가기](https://youtu.be/OCn8zAULs1U?si=TvshBzbYdlgdFZzy)**
+
+---
+
 ## 📝 기본 명령어
 
 | 명령어 | 설명 |
