@@ -6,6 +6,8 @@
 
 호요버스 게임(원신, 스타레일, 젠레스 존 제로), 명조, 명일방주: 엔드필드 플레이어를 위한 디스코드 봇입니다.
 
+> ⚠️ **안내**: Hakushin 사이트가 폐쇄된 관계로 `hakushin` 패키지를 더 이상 사용할 수 없습니다. 현재 대체 데이터 소스(HoneyHunter, Prydwen, StarRailRes 등)로 전환 작업이 진행 중입니다. 일부 기능이 정상적으로 동작하지 않을 수 있습니다.
+
 ## ✨ 주요 기능
 
 - **🎁 리딤코드 자동 알림**: 새로운 리딤코드가 나오면 자동으로 알림 (원신, 스타레일, 젠레스, 엔드필드)
@@ -64,22 +66,12 @@
 
 > 💡 봇을 종료하려면 창을 닫거나 `Ctrl+C`를 누르세요.
 
-### 6단계: 선택 기능 설치 (Optional)
+### 6단계: 참고 사항
 
-#### 📊 캐릭터/무기/성유물 정보 기능
-
-캐릭터 정보(`!캐릭터`), 무기 정보(`!무기`) 등의 기능을 사용하려면 다음 명령어를 실행하세요:
-
-```bash
-pip install git+https://github.com/seriaati/hakushin-py.git
-```
-
-> ⚠️ **오류 발생 시:**
-> ```
-> ❌ cogs.hoyo_characters는 hakushin 모듈이 필요합니다. (선택사항)
-> ❌ ModuleNotFoundError: No module named 'hakushin'
-> ```
-> 위 에러가 표시되면 cmd 또는 PowerShell에서 위 명령어를 실행한 후 봇을 재시작하세요.
+> ⚠️ **캐릭터/무기/성유물 정보 기능 (임시 비활성화)**
+> 
+> 데이터 제공원인 Hakushin 사이트가 호요버스 정책 위반으로 폐쇄되어,
+> `!캐릭터`, `!무기`, `!성유물` 등의 기능이 현재 비활성화 상태입니다.
 
 ---
 
@@ -96,9 +88,9 @@ pip install git+https://github.com/seriaati/hakushin-py.git
 | `!도움` | 전체 명령어 목록 보기 |
 | `!운세` | 오늘의 운세 확인 |
 | `!뽑기` | 가챠 시뮬레이터 |
-| `!캐릭터 [이름]` | 캐릭터 정보 조회 |
-| `!무기 [이름]` | 무기 정보 조회 |
-| `!성유물 [이름]` | 성유물 정보 조회 |
+| `!캐릭터 [이름]` | ~~캐릭터 정보 조회~~ (비활성화) |
+| `!무기 [이름]` | ~~무기 정보 조회~~ (비활성화) |
+| `!성유물 [이름]` | ~~성유물 정보 조회~~ (비활성화) |
 
 ### 관리자 명령어
 
@@ -166,4 +158,4 @@ pip install git+https://github.com/seriaati/hakushin-py.git
 ## 🙏 크레딧
 
 - 리딤코드 API: [hoyo-codes.seria.moe](https://hoyo-codes.seria.moe)
-- 게임 데이터: [Hakushin](https://gi.hakush.in)
+- ~~게임 데이터: [Hakushin](https://gi.hakush.in)~~ (사이트 폐쇄)

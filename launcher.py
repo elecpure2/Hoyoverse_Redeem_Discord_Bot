@@ -12,8 +12,6 @@ def install_packages():
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
         print("✅ 기본 패키지 설치 완료\n")
         
-        # Hakushin 설치 제거 (Repository Not Found 오류 및 사용처 불분명)
-        
         # 설치 마커 생성
         with open(".installed", "w") as f:
             f.write("installed")

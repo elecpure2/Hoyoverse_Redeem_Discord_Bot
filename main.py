@@ -27,10 +27,14 @@ COGS = [
     "cogs.help",
 
     # "cogs.upcoming", # Deprecated
-    "cogs.hoyo_characters",
-    "cogs.hoyo_weapons",
-    "cogs.hoyo_artifacts",
-    "cogs.hakushin",
+    # "cogs.hoyo_characters",  # Disabled: hakushin 사이트 폐쇄
+    # "cogs.hoyo_weapons",     # Disabled: hakushin 사이트 폐쇄
+    # "cogs.hoyo_artifacts",   # Disabled: hakushin 사이트 폐쇄
+    # "cogs.hakushin",         # Disabled: hakushin 사이트 폐쇄
+    "cogs.gi_info",            # 원신 정보 (Honey Hunter World)
+    "cogs.hsr_info",           # 스타레일 정보 (Prydwen.gg)
+    "cogs.zzz_info",           # 젠존제 정보 (Prydwen.gg)
+    "cogs.hoyo_info",          # 통합 검색 (!캐릭터/!무기/!성유물)
     "cogs.events",
 ]
 
@@ -52,9 +56,6 @@ async def load_cogs():
             print(f"  ✅ {cog} 로드 완료")
         except Exception as e:
             print(f"  ❌ {cog} 로드 실패: {e}")
-            # hakushin 관련 모듈은 선택적이므로 경고만 출력
-            if 'hakushin' in str(e).lower():
-                print(f"  ⚠️ {cog}는 hakushin 모듈이 필요합니다. (선택사항)")
 
 async def main():
     # 토큰 확인

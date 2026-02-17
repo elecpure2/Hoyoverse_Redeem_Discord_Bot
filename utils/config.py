@@ -146,10 +146,10 @@ NOTIFY_TYPES = {
     "petitplanet_yt_community": {"name": "쁘띠플레닛 커뮤니티", "emoji": "📢"},
     "varsapura_yt_community": {"name": "Varsapura 커뮤니티", "emoji": "📢"},
     "nexusanima_yt_community": {"name": "넥서스아니마 커뮤니티", "emoji": "📢"},
-    "hakushin_update": {"name": "신규 업데이트", "emoji": "🆕"},
+    # "hakushin_update": {"name": "신규 업데이트", "emoji": "🆕"},  # Disabled: hakushin 사이트 폐쇄
 }
 
-SENT_HAKUSHIN_FILE = "data/sent_hakushin.json"
+# SENT_HAKUSHIN_FILE = "data/sent_hakushin.json"  # Disabled: hakushin 사이트 폐쇄
 
 CHARACTER_NAME_TO_ENKA = {
     "콜롬비나": "Columbina", "푸리나": "Furina", "나히다": "Nahida",
