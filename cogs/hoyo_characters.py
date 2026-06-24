@@ -35,11 +35,8 @@ _LEFTOVER_PARAM = re.compile(r'#\d+\[[^\]]*\]%?')
 
 
 def _clean_skill(desc: str, params=None) -> str:
-    """스킬/돌파 설명 정리. 파라미터가 있으면 치환, 없으면 남은 토큰 제거."""
-    text = clean_description(desc or '', params)
-    text = _LEFTOVER_PARAM.sub('', text)
-    text = re.sub(r' {2,}', ' ', text)
-    return text.strip()
+    """스킬/돌파 설명 정리 (clean_description 래퍼)."""
+    return clean_description(desc or '', params)
 
 
 def _first_value(d):
@@ -223,12 +220,45 @@ class HoyoCharacters(commands.Cog):
 
         return embeds
 
+    @staticmethod
+    def _pick_by_level(level_dict, target):
+        """{key:{'level':N,...}} 에서 level==target (없으면 target 이하 최대, 그것도 없으면 최소) 항목 반환."""
+        if not isinstance(level_dict, dict) or not level_dict:
+            return None
+        entries = [v for v in level_dict.values() if isinstance(v, dict) and isinstance(v.get('level'), int)]
+        if not entries:
+            return None
+        le = [v for v in entries if v['level'] <= target]
+        return max(le, key=lambda v: v['level']) if le else min(entries, key=lambda v: v['level'])
+
+    def _gi_skill_attrs(self, promote, target=10) -> list:
+        """GI 스킬의 지정 레벨(기본 10) 데미지 배율(% 표기) 표를 추출."""
+        entry = self._pick_by_level(promote, target)
+        if not entry:
+            return []
+        param = entry.get('param', [])
+        lines = []
+        for item in entry.get('desc', []) or []:
+            if not isinstance(item, str) or '|' not in item:
+                continue
+            label, tmpl = item.split('|', 1)
+            val = clean_description(tmpl, param).strip()
+            label = label.strip()
+            if label and val and '%' in val:  # 데미지/배율(%) 위주
+                lines.append(f"{label}: {val}")
+        return lines[:10]
+
     def _skill_fields(self, game: Game, data: dict) -> list:
         out = []
         if game == Game.GI:
             for s in data.get('skills', []) or []:
                 if isinstance(s, dict) and s.get('name'):
-                    out.append((s['name'], _clean_skill(s.get('desc', ''))))
+                    desc = _clean_skill(s.get('desc', ''))[:280]
+                    attrs = self._gi_skill_attrs(s.get('promote'), 10)
+                    val = desc
+                    if attrs:
+                        val = (desc + "\n\n**[Lv.10 데미지 배율]**\n" + "\n".join(attrs)).strip()
+                    out.append((s['name'], val))
         elif game == Game.HSR:
             skills = data.get('skills', {})
             seen = set()
@@ -240,22 +270,25 @@ class HoyoCharacters(commands.Cog):
                     continue
                 seen.add(nm)
                 params = None
-                level = s.get('level')
-                if isinstance(level, dict):
-                    l1 = level.get('1') or next(iter(level.values()), None)
-                    if isinstance(l1, dict):
-                        params = l1.get('param_list')
+                lv = self._pick_by_level(s.get('level'), 10)
+                if isinstance(lv, dict):
+                    params = lv.get('param_list')
                 out.append((nm, _clean_skill(s.get('desc', ''), params)))
-        else:  # ZZZ
-            skills = data.get('skill_list') or data.get('skill')
-            if isinstance(skills, dict):
-                skills = list(skills.values())
-            if isinstance(skills, list):
-                for s in skills:
-                    if isinstance(s, dict) and s.get('name'):
-                        d = s.get('desc') or s.get('description') or ''
-                        out.append((s['name'], _clean_skill(d)))
-            # 패시브(코어 스킬)
+        else:  # ZZZ — skill dict(basic/dodge/special/chain/assist)의 실제 설명 사용
+            skill = data.get('skill')
+            if isinstance(skill, dict):
+                for cat in ('basic', 'dodge', 'special', 'chain', 'assist'):
+                    block = skill.get(cat)
+                    descs = block.get('description', []) if isinstance(block, dict) else []
+                    if not descs:
+                        continue
+                    # chain 은 궁극기 우선, 그 외엔 첫 항목
+                    pick = next((x for x in descs if isinstance(x, dict) and '궁극기' in str(x.get('name', ''))), descs[0])
+                    nm = pick.get('name')
+                    dv = _clean_skill(pick.get('desc', ''))
+                    if nm and dv:
+                        out.append((nm, dv))
+            # 코어 패시브
             passive = data.get('passive')
             if isinstance(passive, dict) and passive.get('name'):
                 out.append((passive['name'], _clean_skill(passive.get('desc', ''))))

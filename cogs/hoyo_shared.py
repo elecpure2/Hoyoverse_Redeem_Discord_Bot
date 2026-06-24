@@ -29,73 +29,85 @@ GAME_URLS = {
     Game.ZZZ: "zzz"
 }
 
+# ZZZ 스킬 아이콘 태그 -> 이모지
+ICONMAP_EMOJI = {
+    'Icon_Normal': '⚔️', 'Icon_Special': '🔷', 'Icon_SpecialReady': '🔷',
+    'Icon_Evade': '💨', 'Icon_QTE': '⚡', 'Icon_UltimateReady': '💥',
+    'Icon_Ultimate': '💥', 'Icon_Switch': '🔄', 'Icon_Assist': '🤝',
+    'Icon_Dodge': '💨', 'Icon_Chain': '⛓️',
+}
+
+
+def _fmt_param(value, decimals: int, percent: bool) -> str:
+    """파라미터 값을 포맷. percent=True 면 ×100 후 % 표기."""
+    if isinstance(value, str):
+        return value + ("%" if percent else "")
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    if percent:
+        v *= 100
+    if decimals <= 0:
+        s = f"{int(round(v))}"
+    else:
+        s = f"{v:.{decimals}f}".rstrip('0').rstrip('.')
+        if not s or s == '-0':
+            s = '0'
+    return s + ("%" if percent else "")
+
+
 def clean_description(text: str, params=None) -> str:
+    """스킬/무기/돌파 설명 정리.
+
+    - HSR 스타일 `#N[fmt]%` 와 GI 스타일 `{paramN:FMT}` 플레이스홀더를 params 로 치환
+      (`%`/`P` 포맷은 항상 ×100). params 없거나 범위 밖이면 깔끔히 제거.
+    - `{LINK#...}{/LINK}`, `<color>`/`<unbreak>`/`<IconMap>` 등 태그 제거.
+    """
     if not text:
         return ""
-    
-    # 0. ZZZ IconMap tags -> emoji mapping
-    icon_map = {
-        'Icon_Normal': '⚔️',
-        'Icon_Special': '🔷',
-        'Icon_SpecialReady': '🔷',
-        'Icon_Evade': '💨',
-        'Icon_QTE': '⚡',
-        'Icon_UltimateReady': '💥',
-        'Icon_Switch': '🔄',
-    }
-    for icon_key, emoji in icon_map.items():
-        text = text.replace(f'<IconMap:{icon_key}>', emoji)
-    
-    # 1. HTML/color tags removal using regex
-    text = re.sub(r'<[^>]+>', '', text)
-    
-    # 2. Param replacement if provided
+
+    # IconMap -> 이모지
+    text = re.sub(r'<IconMap:([^>]+)>', lambda m: ICONMAP_EMOJI.get(m.group(1), ''), text)
+
     if params:
-        def replace_param(match):
-            idx = int(match.group(1)) - 1
-            algo = match.group(2) # i, f1, P, etc
-            percent = match.group(3) # % or empty
-
+        # HSR: #N[i] / #N[f1] / #N[i]%
+        def _hsr(m):
+            idx = int(m.group(1)) - 1
+            fmt = m.group(2).lower()
+            pct = m.group(3) == '%'
             if 0 <= idx < len(params):
-                val = params[idx]
-                
-                # Handle non-numeric params (strings from ZZZ API)
-                if isinstance(val, str):
-                    return val + percent
-                
-                # HSR/ZZZ convention: if tag has %, multiply by 100
-                # But only if value looks like a ratio (< 1)
-                if percent == '%' and isinstance(val, (int, float)):
-                    if val < 1:
-                        val *= 100
-                    
-                # Formatting
-                if algo == 'i':
-                    return f"{int(round(val))}" + percent
-                elif algo == 'f1':
-                    return f"{val:.1f}" + percent
-                elif algo == 'P':
-                    # ZZZ uses P for percentage values (already multiplied)
-                    return f"{val:.1f}" + percent
-                else:
-                    if isinstance(val, float):
-                        return f"{val:.1f}" + percent
-                    return f"{val}" + percent
-            return match.group(0)
+                dec = 0 if fmt.startswith('i') else (int(fmt[1:]) if len(fmt) > 1 and fmt[1:].isdigit() else 1)
+                return _fmt_param(params[idx], dec, pct)
+            return ''
+        text = re.sub(r'#(\d+)\[([a-zA-Z]\d?)\](%?)', _hsr, text)
 
-        # Regex to match #1[i], #1[i]%, #1[P]% etc
-        text = re.sub(r'#(\d+)\[([a-zA-Z0-9]+)\](%?)', replace_param, text)
-    
-    # Strip {LINK...} parsing
-    text = re.sub(r'\{LINK#.+?\}(.+?)\{/LINK\}', r'\1', text)
-    
-    # 3. Newline fixes (HSR literal \n)
-    text = text.replace(r'\n', '\n')
-    
-    # 4. Clean up multiple spaces/newlines
+        # GI: {paramN:F1P} / {paramN:F1} / {paramN:P} / {paramN:I}
+        def _gi(m):
+            idx = int(m.group(1)) - 1
+            fmt = m.group(2)
+            if 0 <= idx < len(params):
+                pct = 'P' in fmt.upper()
+                dm = re.search(r'[Ff](\d)', fmt)
+                dec = int(dm.group(1)) if dm else (0 if fmt.upper().startswith('I') else 1)
+                return _fmt_param(params[idx], dec, pct)
+            return ''
+        text = re.sub(r'\{param(\d+):([A-Za-z0-9]+)\}', _gi, text)
+
+    # LINK 태그 제거 (내부 텍스트는 유지)
+    text = re.sub(r'\{LINK#[^}]*\}', '', text)
+    text = text.replace('{/LINK}', '')
+    # < > 태그 제거 (color, unbreak 등)
+    text = re.sub(r'<[^>]+>', '', text)
+    # 미치환 잔여 플레이스홀더 제거
+    text = re.sub(r'#\d+\[[^\]]*\]%?', '', text)
+    text = re.sub(r'\{param\d+:[^}]*\}', '', text)
+    text = re.sub(r'\{/?[A-Za-z][^}]*\}', '', text)
+
+    # 줄바꿈/공백 정리
+    text = text.replace('\\n', '\n')
+    text = re.sub(r'[ \t]{2,}', ' ', text)
     text = re.sub(r'\n{3,}', '\n\n', text)
-    text = re.sub(r' {2,}', ' ', text)
-    
     return text.strip()
 
 class HoyoSelectView(View):

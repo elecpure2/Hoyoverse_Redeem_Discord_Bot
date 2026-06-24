@@ -134,10 +134,10 @@ class HoyoArtifacts(commands.Cog):
             set_data = art_data.get('set', {})
             if '2' in set_data:
                 s = set_data['2']
-                set_2pc = self._format_hsr_desc(s.get('ko') or s.get('en', ''), s.get('ParamList', []))
+                set_2pc = clean_description(s.get('ko') or s.get('en', ''), s.get('ParamList', []))
             if '4' in set_data:
                 s = set_data['4']
-                set_4pc = self._format_hsr_desc(s.get('ko') or s.get('en', ''), s.get('ParamList', []))
+                set_4pc = clean_description(s.get('ko') or s.get('en', ''), s.get('ParamList', []))
             icon_url = nanoka.artifact_icon_url("hsr", art_data.get('icon'))
 
         elif game == Game.ZZZ:
