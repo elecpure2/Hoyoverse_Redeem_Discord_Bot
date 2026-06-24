@@ -56,7 +56,7 @@ class YouTube(commands.Cog):
     def cog_unload(self):
         self.check_youtube.cancel()
     
-    @commands.command(name="RSS테스트")
+    @commands.command(name="영상확인", aliases=["RSS테스트"])
     @commands.has_permissions(administrator=True)
     async def rss_test(self, ctx, channel: str = "genshin"):
         channel_map = {

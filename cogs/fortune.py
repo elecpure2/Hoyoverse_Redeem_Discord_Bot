@@ -10,7 +10,7 @@ class Fortune(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @app_commands.command(name="뽑기", description="오늘의 운세를 확인해요 (하루 1회)")
+    @app_commands.command(name="운세", description="오늘의 운세를 확인해요 (하루 1회)")
     async def slash_fortune(self, interaction: discord.Interaction):
         user_id = str(interaction.user.id)
         today = date.today().isoformat()
@@ -44,7 +44,7 @@ class Fortune(commands.Cog):
         embed.set_footer(text=f"요청자: {interaction.user.display_name}")
         await interaction.response.send_message(embed=embed)
     
-    @commands.command(name="뽑기")
+    @commands.command(name="운세", aliases=["뽑기"])
     async def fortune(self, ctx):
         user_id = str(ctx.author.id)
         today = date.today().isoformat()

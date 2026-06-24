@@ -29,45 +29,10 @@ async def fetch_hoyo_codes(api_url):
         return []
 
 async def fetch_wuwa_codes():
-    try:
-        async with aiohttp.ClientSession() as session:
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-            async with session.get(WUWA_CONFIG["wiki_url"], timeout=aiohttp.ClientTimeout(total=30), headers=headers) as resp:
-                if resp.status != 200:
-                    print(f"명조 코드 가져오기 실패: HTTP {resp.status}")
-                    return []
-                html = await resp.text()
-                soup = BeautifulSoup(html, 'lxml')
-                
-                codes = []
-                active_table = soup.find('table', id='tpt-acticodes')
-                
-                if not active_table:
-                    print("명조 Active 테이블을 찾을 수 없음")
-                    return []
-                
-                rows = active_table.find_all('tr')[1:]
-                for row in rows:
-                    cells = row.find_all('td')
-                    if len(cells) >= 3:
-                        code_cell = cells[1]
-                        reward_cell = cells[3] if len(cells) > 3 else cells[2]
-                        
-                        code_tag = code_cell.find('code')
-                        if code_tag:
-                            code = code_tag.get_text(strip=True)
-                            reward = reward_cell.get_text(strip=True)
-                            
-                            if code and len(code) > 3:
-                                codes.append({
-                                    "code": code,
-                                    "rewards": reward
-                                })
-                
-                return codes
-    except Exception as e:
-        print(f"명조 코드 가져오기 중 예외 발생: {e}")
-        return []
+    # 명조(WuWa)는 현재 실시간 코드를 제공하는 사이트가 없어 비활성화함.
+    # (기존 wutheringwaves 위키가 403으로 차단되어 로그를 도배 → 네트워크 요청 자체를 제거)
+    # 추후 안정적인 소스가 생기면 여기서 다시 구현하면 됨.
+    return []
 
 async def fetch_endfield_codes():
     try:

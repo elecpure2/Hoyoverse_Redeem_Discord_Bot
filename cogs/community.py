@@ -139,7 +139,7 @@ class Community(commands.Cog):
     def cog_unload(self):
         self.check_community.cancel()
     
-    @commands.command(name="커뮤테스트")
+    @commands.command(name="커뮤확인", aliases=["커뮤테스트"])
     @commands.has_permissions(administrator=True)
     async def community_test(self, ctx, game: str = "genshin"):
         game_map = {
@@ -192,8 +192,8 @@ class Community(commands.Cog):
         if post["published"]:
             embed.add_field(name="⏰ 게시", value=post["published"], inline=True)
         
-        embed.set_footer(text="테스트용 - 이 명령어는 나중에 삭제해주세요")
-        
+        embed.set_footer(text="관리자 진단용 · 커뮤니티 최근 게시물")
+
         await ctx.send(embed=embed)
     
     @tasks.loop(minutes=1)

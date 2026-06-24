@@ -4,7 +4,9 @@ from discord.ext import commands
 import random
 from utils.data import load_data, save_data
 
-COLUMBINA_IMAGE = "https://upload-os-bbs.hoyolab.com/upload/2025/12/04/24e704fe94fbbba73e87672a3a5a52ae_8561535823237482048.png"
+# 산드로네 일러스트. 출시 전엔 CDN(enka)에 없어 썸네일이 안 뜰 수 있으나(=미표시), 출시되면 자동 표시됨.
+# 지금 바로 이미지를 띄우고 싶으면 HoYoLAB 등에서 받은 직링크로 교체하면 됨.
+SANDRONE_IMAGE = "https://enka.network/ui/UI_Gacha_AvatarImg_MarionetteNew.png"
 
 def do_single_pull(pity_5star, pity_4star):
     is_lucky = False
@@ -54,7 +56,7 @@ class Gacha(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
     
-    @app_commands.command(name="기원", description="콜롬비나 픽업 기원 시뮬레이터 (1~100회)")
+    @app_commands.command(name="기원", description="산드로네 픽업 기원 시뮬레이터 (1~100회)")
     @app_commands.describe(횟수="기원 횟수 (1~100)")
     async def slash_gacha(self, interaction: discord.Interaction, 횟수: int = 1):
         if 횟수 < 1: 횟수 = 1
@@ -148,14 +150,14 @@ class Gacha(commands.Cog):
                     total_columbina += 1
                     got_columbina = True
                     guaranteed = False
-                    five_star_logs.append(f"🟡 **콜롬비나** ({pity_count}회차) - *확정 천장*")
+                    five_star_logs.append(f"🟡 **산드로네** ({pity_count}회차) - *확정 천장*")
                 elif random.random() < 0.5:
                     # 반천장 성공 (기본 50%)
                     results.append("🟡")
                     total_columbina += 1
                     got_columbina = True
                     guaranteed = False
-                    five_star_logs.append(f"🟡 **콜롬비나** ({pity_count}회차) - *반천장 성공*")
+                    five_star_logs.append(f"🟡 **산드로네** ({pity_count}회차) - *반천장 성공*")
                 else:
                     # 반천장 실패 -> 별빛 포착(Capturing Radiance) 체크 (패배한 50% 중 10% 구제 = 전체 5%)
                     # 종합 확률 55% 달성
@@ -164,7 +166,7 @@ class Gacha(commands.Cog):
                         total_columbina += 1
                         got_columbina = True
                         guaranteed = False
-                        five_star_logs.append(f"✨ **콜롬비나** ({pity_count}회차) - **✨ 별빛 포착 발동!**")
+                        five_star_logs.append(f"✨ **산드로네** ({pity_count}회차) - **✨ 별빛 포착 발동!**")
                     else:
                         # 진짜 픽뚫
                         results.append("👻")
@@ -198,50 +200,49 @@ class Gacha(commands.Cog):
         })
         save_data(data)
         
-        # 임베드 생성 로직 (11뽑 이상은 요약, 10뽑 이하는 그리드)
+        # 결과 그리드: 모든 뽑기를 5개씩 동그라미로 나열 (5성이 어디서 떴는지 한눈에)
+        display_str = ""
+        for i, res in enumerate(results):
+            display_str += res + " "
+            if (i + 1) % 5 == 0:
+                display_str += "\n"
+        legend = "🟡 산드로네 · 👻 치치 · ✨ 별빛 포착 · 🟣 4성 · 🔵 3성"
+
+        # 임베드 생성 (1·10·100뽑 모두 동그라미 그리드로 시각화)
         if num_pulls > 10:
-            embed = discord.Embed(title=f"💫 콜롬비나 픽업 기원 결과 ({num_pulls}회)", color=0xFFD700)
-            
-            # 5성 결과가 있을 때
+            title = "✨ 산드로네 획득! ✨" if got_columbina else "💫 산드로네 픽업 기원 결과"
+            embed = discord.Embed(
+                title=f"{title} ({num_pulls}회)",
+                description=f"{display_str}\n{legend}",
+                color=0xFFD700 if got_columbina else 0x9966CC,
+            )
+
             if five_star_logs:
-                embed.add_field(name="★★★★★ (5성)", value="\n".join(five_star_logs), inline=False)
+                embed.add_field(name="⭐ 5성 획득", value="\n".join(five_star_logs), inline=False)
             else:
-                embed.add_field(name="★★★★★ (5성)", value="없음... (다음엔 꼭!)", inline=False)
-            
-            embed.add_field(name="★★★★ (4성)", value=f"🟣 4성 아이템 x {count_4star}개", inline=False)
-            embed.add_field(name="★★★ (3성)", value=f"🔵 3성 무기 x {count_3star}개", inline=False)
-            
+                embed.add_field(name="⭐ 5성 획득", value="없음... (다음엔 꼭!)", inline=False)
+
+            embed.add_field(name="결과 요약", value=f"🟣 4성 {count_4star}개   ·   🔵 3성 {count_3star}개", inline=False)
+
             status_msg = f"다음 5성까지 **{90 - pity_5star}회** 남음"
-            if guaranteed:
-                status_msg += " (확정 천장 🔥)"
-            else:
-                status_msg += " (반천장 🎲)"
-                
+            status_msg += " (확정 천장 🔥)" if guaranteed else " (반천장 🎲)"
             embed.add_field(name="📊 현재 상태", value=status_msg, inline=False)
-            
+
         else:
-            # 1, 10뽑용 비주얼 출력
-            # 5개씩 줄바꿈
-            display_str = ""
-            for i, res in enumerate(results):
-                display_str += res + " "
-                if (i + 1) % 5 == 0:
-                    display_str += "\n"
-            
             title = "💫 기원 결과"
             if got_columbina:
-                title = "✨ 콜롬비나 획득! ✨"
+                title = "✨ 산드로네 획득! ✨"
                 color = 0xFFD700
             elif got_5star:
                 title = "👻 치치가 왔습니다..."
                 color = 0x808080
             else:
                 color = 0x9966CC
-            
+
             embed = discord.Embed(title=title, description=display_str, color=color)
             
             obtained = []
-            if got_columbina: obtained.append("콜롬비나")
+            if got_columbina: obtained.append("산드로네")
             if any(r == "👻" for r in results): obtained.append("치치")
             if count_4star > 0: obtained.append("4성 아이템")
             if not obtained: obtained.append("3성 무기")
@@ -269,13 +270,14 @@ class Gacha(commands.Cog):
                 luck_msg = "💀 **폭사... (다음엔 잘 될 거예요)**"
 
             # C6 완료 임베드 생성
-            embed = discord.Embed(title="👑 **콜롬비나 6돌파(C6) 달성!** 👑", description="축하합니다! 졸업하셨습니다! 🎉", color=0xFF0000)
+            embed = discord.Embed(title="👑 **산드로네 6돌파(C6) 달성!** 👑", description="축하합니다! 졸업하셨습니다! 🎉", color=0xFF0000)
             
             embed.add_field(name="📉 **총 소모 기원**", value=f"{total_pulls}회\n({total_primogems:,} 원석)", inline=True)
             embed.add_field(name="👻 **총 픽뚫(치치)**", value=f"{total_qiqi}회", inline=True)
             embed.add_field(name="📊 **운세 분석**", value=f"{luck_msg}\n(평균 655회 대비 {efficiency:.1f}% 효율)", inline=False)
             
-            embed.set_thumbnail(url=COLUMBINA_IMAGE)
+            if SANDRONE_IMAGE:
+                embed.set_thumbnail(url=SANDRONE_IMAGE)
             embed.set_footer(text="데이터가 초기화되었습니다. 다시 1회부터 시작할 수 있습니다.")
 
             # 데이터 초기화
@@ -293,8 +295,9 @@ class Gacha(commands.Cog):
         else:
             c_status = f"{constellation}돌파 (C{constellation})"
             
-        footer_text = f"누적: {total_pulls}회 | 콜롬비나: {c_status} | 픽뚫(치치): {total_qiqi}회"
-        embed.set_thumbnail(url=COLUMBINA_IMAGE)
+        footer_text = f"누적: {total_pulls}회 | 산드로네: {c_status} | 픽뚫(치치): {total_qiqi}회"
+        if SANDRONE_IMAGE:
+            embed.set_thumbnail(url=SANDRONE_IMAGE)
         embed.set_footer(text=footer_text)
         return embed
 

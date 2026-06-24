@@ -7,8 +7,8 @@ DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-TEST_CHANNEL_ID = 1447088802312093769
-GAME_CHANNEL_ID = 1088424836944105482
+TEST_CHANNEL_ID = 0
+GAME_CHANNEL_ID = 0
 
 DATA_FILE = "data/user_data.json"
 SENT_CODES_FILE = "data/sent_codes.json"
@@ -18,7 +18,7 @@ SENT_VIDEOS_FILE = "data/sent_videos.json"
 
 HOYO_GAME_CONFIGS = {
     "genshin": {
-        "channel_id": 1103924217138913381,
+        "channel_id": 0,
         "api_url": "https://hoyo-codes.seria.moe/codes?game=genshin",
         "redeem_url": "https://genshin.hoyoverse.com/ko/gift?code=",
         "name": "원신",
@@ -26,7 +26,7 @@ HOYO_GAME_CONFIGS = {
         "currency_name": "원석",
     },
     "hkrpg": {
-        "channel_id": 1103927150677073962,
+        "channel_id": 0,
         "api_url": "https://hoyo-codes.seria.moe/codes?game=hkrpg",
         "redeem_url": "https://hsr.hoyoverse.com/gift?code=",
         "name": "붕괴: 스타레일",
@@ -34,7 +34,7 @@ HOYO_GAME_CONFIGS = {
         "currency_name": "성옥",
     },
     "nap": {
-        "channel_id": 1256212554556899431,
+        "channel_id": 0,
         "api_url": "https://hoyo-codes.seria.moe/codes?game=nap",
         "redeem_url": "https://zenless.hoyoverse.com/redemption?code=",
         "name": "젠레스 존 제로",
@@ -44,7 +44,7 @@ HOYO_GAME_CONFIGS = {
 }
 
 WUWA_CONFIG = {
-    "channel_id": 1243618955378163813,
+    "channel_id": 0,
     "wiki_url": "https://wutheringwaves.fandom.com/wiki/Redemption_Code",
     "name": "명조",
     "currency_keyword": "astrite",
@@ -113,7 +113,7 @@ CHARACTER_FORTUNES = [
     ("종려", "🪨", "지갑을 집에 두고 왔나요? 오늘은 충동구매를 조심하세요.", 0xDAA520),
     ("벤티", "🍃", "바람이 이끄는 대로~ 중요한 일은 내일의 나에게 미루게 됩니다.", 0x7FFFD4),
     ("베넷", "🍀", "운이 조금 없을 수도... 하지만 따봉 하나면 극복 가능합니다!", 0x32CD32),
-    ("니콜", "😇", "우주에서 천사가 당신에게 속삭입니다. 뜻밖의 깨달음을 얻을지도?", 0xFFFFE0),
+    ("니콜", "🕊️", "말보다 마음의 소리에 귀 기울이는 날. 침묵 속에서 진심이 전해질지도.", 0xFF6B35),
     ("산드로네", "🤖", "감정을 배제하고 기계처럼 효율적으로 처리하면 성공하는 날.", 0x708090),
     ("느비예트", "🌧️", "오늘 하루 물 2리터 마시기 도전! 물의 용왕님이 지켜보고 계십니다.", 0x1E90FF),
     ("야에 미코", "🦊", "재미있는 구경거리가 생길지도? 여유롭게 즐기세요~", 0xFF69B4),
@@ -122,6 +122,8 @@ CHARACTER_FORTUNES = [
     ("아를레키노", "🔥", "차가운 이성으로 결단할 때입니다. 망설임은 금물.", 0x8B0000),
     ("파루잔", "📖", "지식의 탐구에 좋은 날입니다! 선배님이라고 불러보세요.", 0x20B2AA),
     ("코코미", "🐟", "모든 것이 책략대로. 준비된 자에게 완벽한 승리가 찾아옵니다.", 0xFFB6C1),
+    ("시틀라리", "👵", "「요즘 젊은것들은…」 잔소리 속에 노련한 지혜가 빛나는 날. 따뜻하게 입어.", 0x90CAF9),
+    ("라우마", "🌙", "달빛처럼 은은한 위로가 찾아오는 날. 지친 마음에 숲의 축복이 깃듭니다.", 0x66BB6A),
 ]
 
 NOTIFY_TYPES = {
@@ -146,10 +148,10 @@ NOTIFY_TYPES = {
     "petitplanet_yt_community": {"name": "쁘띠플레닛 커뮤니티", "emoji": "📢"},
     "varsapura_yt_community": {"name": "Varsapura 커뮤니티", "emoji": "📢"},
     "nexusanima_yt_community": {"name": "넥서스아니마 커뮤니티", "emoji": "📢"},
-    # "hakushin_update": {"name": "신규 업데이트", "emoji": "🆕"},  # Disabled: hakushin 사이트 폐쇄
+    "hakushin_update": {"name": "신규 업데이트", "emoji": "🆕"},
 }
 
-# SENT_HAKUSHIN_FILE = "data/sent_hakushin.json"  # Disabled: hakushin 사이트 폐쇄
+SENT_HAKUSHIN_FILE = "data/sent_hakushin.json"
 
 CHARACTER_NAME_TO_ENKA = {
     "콜롬비나": "Columbina", "푸리나": "Furina", "나히다": "Nahida",
@@ -203,7 +205,7 @@ AVATAR_ID_TO_KR = {
     10000114: "스커크", 10000115: "달리아", 10000116: "이네파",
     10000117: "별인형", 10000118: "별인형",
     10000119: "라우마", 10000120: "플린스", 10000121: "아이노", 10000122: "네페르",
-    10000123: "두린", 10000124: "야호다", 10000125: "콜롬비나",
+    10000123: "두린", 10000124: "야호다",
     10000904: "콜롬비나",
 }
 

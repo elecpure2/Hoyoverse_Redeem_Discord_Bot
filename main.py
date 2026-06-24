@@ -7,9 +7,9 @@ from utils.config import DISCORD_TOKEN
 
 # Windows 콘솔 인코딩 설정 (Cursor 터미널에서는 불필요 - 오히려 출력 차단됨)
 # 일반 CMD/PowerShell에서 이모지가 깨질 경우에만 아래 주석 해제
-# if sys.platform == 'win32':
-#     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-#     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -27,14 +27,16 @@ COGS = [
     "cogs.help",
 
     # "cogs.upcoming", # Deprecated
-    # "cogs.hoyo_characters",  # Disabled: hakushin 사이트 폐쇄
-    # "cogs.hoyo_weapons",     # Disabled: hakushin 사이트 폐쇄
-    # "cogs.hoyo_artifacts",   # Disabled: hakushin 사이트 폐쇄
-    # "cogs.hakushin",         # Disabled: hakushin 사이트 폐쇄
-    "cogs.gi_info",            # 원신 정보 (Honey Hunter World)
-    "cogs.hsr_info",           # 스타레일 정보 (Prydwen.gg)
-    "cogs.zzz_info",           # 젠존제 정보 (Prydwen.gg)
-    "cogs.hoyo_info",          # 통합 검색 (!캐릭터/!무기/!성유물)
+    # ── nanoka.cc 데이터 (구 hakush.in, 사이트 부활) ──
+    "cogs.hoyo_characters",    # /캐릭터·/신캐 (nanoka.cc)
+    "cogs.hoyo_weapons",       # /무기·/신무기 (nanoka.cc)
+    "cogs.hoyo_artifacts",     # /성유물·/신성유물 (nanoka.cc)
+    "cogs.hakushin",           # 업데이트 알람 (nanoka.cc manifest 기반)
+    # ── Honey Hunter/Prydwen 계열: 사이트 폐쇄/차단으로 비활성 (nanoka 로 통일) ──
+    # "cogs.gi_info",          # Disabled: Honey Hunter World 폐쇄
+    # "cogs.hsr_info",         # Disabled: Prydwen.gg 차단
+    # "cogs.zzz_info",         # Disabled: Prydwen.gg 차단
+    # "cogs.hoyo_info",        # Disabled: 위 백엔드 비활성 → nanoka cog 와 명령어 충돌
     "cogs.events",
 ]
 
