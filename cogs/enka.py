@@ -4,6 +4,38 @@ from discord.ext import commands
 import aiohttp
 from utils.config import AVATAR_ID_TO_KR, AVATAR_ICON_NAMES, COSTUME_ART_NAMES, CHARACTER_NAME_TO_ENKA
 from utils.data import load_uid_data, save_uid_data
+from utils import nanoka
+
+# nanoka GI 캐릭터 목록(id→한글명) 캐시 — 하드코딩표(AVATAR_ID_TO_KR)에 없는 신캐 매칭용
+_gi_name_cache = {}
+
+
+async def _ensure_gi_names():
+    if _gi_name_cache:
+        return
+    try:
+        async with aiohttp.ClientSession() as session:
+            version = await nanoka.get_version(session, "gi")
+            if not version:
+                return
+            async with session.get(nanoka.char_list_url("gi", version)) as resp:
+                if resp.status != 200:
+                    return
+                data = await resp.json()
+        for cid, c in (data.items() if isinstance(data, dict) else []):
+            name = c.get('ko') or c.get('en')
+            if name:
+                try:
+                    _gi_name_cache[int(cid)] = name
+                except (TypeError, ValueError):
+                    pass
+    except Exception as e:
+        print(f"[Enka] GI 이름 캐시 실패: {e}")
+
+
+def resolve_char_name(avatar_id) -> str:
+    """avatar_id → 한글 이름 (하드코딩표 → nanoka 캐시 → 폴백 순)."""
+    return AVATAR_ID_TO_KR.get(avatar_id) or _gi_name_cache.get(avatar_id) or f"캐릭터_{avatar_id}"
 
 class CharacterSelect(discord.ui.Select):
     def __init__(self, characters, uid, bot):
@@ -16,7 +48,8 @@ class CharacterSelect(discord.ui.Select):
     
     async def callback(self, interaction: discord.Interaction):
         char_id = int(self.values[0])
-        char_name = AVATAR_ID_TO_KR.get(char_id, f"캐릭터_{char_id}")
+        await _ensure_gi_names()
+        char_name = resolve_char_name(char_id)
         await interaction.response.send_message(f"🔍 **{char_name}** 빌드를 불러오는 중...", ephemeral=True)
         await show_build_for_uid(interaction.channel, interaction.user, self.uid, char_name, char_id)
 
@@ -26,6 +59,7 @@ class CharacterSelectView(discord.ui.View):
         self.add_item(CharacterSelect(characters, uid, bot))
 
 async def show_build_for_uid(channel, user, uid, char_name, target_avatar_id=None):
+    await _ensure_gi_names()
     try:
         async with aiohttp.ClientSession() as session:
             headers = {"User-Agent": "HoyoRedeemBot/1.0"}
@@ -49,7 +83,7 @@ async def show_build_for_uid(channel, user, uid, char_name, target_avatar_id=Non
         if target_avatar_id and avatar_id == target_avatar_id:
             found_avatar = avatar
             break
-        kr_name = AVATAR_ID_TO_KR.get(avatar_id, "")
+        kr_name = resolve_char_name(avatar_id)
         if kr_name == char_name or char_name in kr_name:
             found_avatar = avatar
             break
@@ -59,7 +93,7 @@ async def show_build_for_uid(channel, user, uid, char_name, target_avatar_id=Non
         return
     
     avatar_id = found_avatar.get("avatarId", 0)
-    char_kr = AVATAR_ID_TO_KR.get(avatar_id, char_name)
+    char_kr = resolve_char_name(avatar_id)
     
     player_info = data.get("playerInfo", {})
     nickname = player_info.get("nickname", "알 수 없음")
@@ -272,10 +306,11 @@ class Enka(commands.Cog):
             await interaction.followup.send(f"✅ UID `{uid}` 등록 완료!\n\n📭 **{nickname}** (AR {level})\n전시된 캐릭터가 없어요! 게임에서 캐릭터 전시 설정을 확인해주세요.")
             return
         
+        await _ensure_gi_names()
         characters = []
         for avatar in avatar_list:
             avatar_id = avatar.get("avatarId", 0)
-            kr_name = AVATAR_ID_TO_KR.get(avatar_id, f"캐릭터_{avatar_id}")
+            kr_name = resolve_char_name(avatar_id)
             characters.append((avatar_id, kr_name))
         
         embed = discord.Embed(
@@ -334,10 +369,11 @@ class Enka(commands.Cog):
             await ctx.send(f"✅ UID `{uid}` 등록 완료!\n\n📭 **{nickname}** (AR {level})\n전시된 캐릭터가 없어요! 게임에서 캐릭터 전시 설정을 확인해주세요.")
             return
         
+        await _ensure_gi_names()
         characters = []
         for avatar in avatar_list:
             avatar_id = avatar.get("avatarId", 0)
-            kr_name = AVATAR_ID_TO_KR.get(avatar_id, f"캐릭터_{avatar_id}")
+            kr_name = resolve_char_name(avatar_id)
             characters.append((avatar_id, kr_name))
         
         embed = discord.Embed(
