@@ -318,6 +318,31 @@ class HoyoCharacters(commands.Cog):
                     out.append((f"{k}. {t['name']}", _clean_skill(t.get('desc', ''), t.get('param') or t.get('params'))))
         return f"✨ {name} - 마인드스케이프 시네마", out
 
+    @staticmethod
+    def _is_existing_char(game: Game, char_entry: dict) -> bool:
+        """이미 출시된 기존 캐릭터인지(=신캐 리스트에서 [Fix] 대상) 판별.
+
+        GI/HSR: 실제 과거 출시일(release)이 있으면 기존 캐릭터.
+        (미출시 신캐는 release 가 1970-01-01/0/빈값)
+        ZZZ: release 필드가 없어 미번역 placeholder 이름이면 신규, 정식 이름이면 기존.
+        """
+        if not isinstance(char_entry, dict):
+            return False
+        rel = char_entry.get('release')
+        if game in (Game.GI, Game.HSR):
+            if not rel:
+                return False
+            s = str(rel)
+            if s.startswith('1970') or s in ('0', '0.0'):
+                return False
+            try:
+                return float(s) > 0          # HSR: 유닉스 타임스탬프
+            except ValueError:
+                return True                  # GI: 날짜 문자열(예 2025-02-11)
+        name = char_entry.get('ko') or char_entry.get('en') or ''
+        placeholder = name.startswith('Avatar') or 'Size0' in name or name.startswith('Item_') or name.endswith('_Name')
+        return bool(name) and not placeholder
+
     async def _fetch_char_detail(self, game_key: str, char_id):
         async with aiohttp.ClientSession() as session:
             version = await nanoka.get_version(session, game_key)
@@ -363,6 +388,15 @@ class HoyoCharacters(commands.Cog):
                     await interaction.followup.send(f"❌ {game_name} 출시 예정 캐릭터가 없어요.")
                     return
 
+                # 기존(Fix) 캐릭터 판별용 목록 (출시일/이름)
+                char_list = {}
+                try:
+                    async with session.get(nanoka.char_list_url(game_key, version)) as resp:
+                        if resp.status == 200:
+                            char_list = await resp.json()
+                except Exception:
+                    pass
+
                 from types import SimpleNamespace
                 chars = []
                 for cid in char_ids[:10]:
@@ -377,14 +411,19 @@ class HoyoCharacters(commands.Cog):
                         c.name = d.get('name') or f"{cid}"
                         c.rarity = self._parse_rarity(game, d.get('rarity'))
                         c.meta = self._char_meta(game, d)
+                        c.is_fix = self._is_existing_char(game, char_list.get(str(cid), {}))
                         chars.append(c)
                     except Exception:
                         pass
 
             color = GAME_COLORS.get(game, 0xFFD700)
+            has_fix = any(getattr(c, 'is_fix', False) for c in chars)
+            desc = f"버전 {version or '?'} · 총 {len(char_ids)}명 · 아래 버튼으로 상세 정보를 확인하세요"
+            if has_fix:
+                desc += "\n`[Fix]` = 기존 캐릭터 (밸런스·데이터 수정)"
             embed = discord.Embed(
                 title=f"🌟 {game_name} · 출시 예정 캐릭터",
-                description=f"버전 {version or '?'} · 총 {len(char_ids)}명 · 아래 버튼으로 상세 정보를 확인하세요",
+                description=desc,
                 color=color,
             )
             for i, c in enumerate(chars):
@@ -392,7 +431,8 @@ class HoyoCharacters(commands.Cog):
                 meta = getattr(c, 'meta', '')
                 if meta:
                     val += f"  ·  {meta}"
-                embed.add_field(name=f"{i+1}.  {c.name}", value=val, inline=False)
+                tag = "  `[Fix]`" if getattr(c, 'is_fix', False) else ""
+                embed.add_field(name=f"{i+1}.  {c.name}{tag}", value=val, inline=False)
             embed.set_footer(text="데이터 출처 · nanoka.cc")
             view = HoyoSelectView(self, chars, game, game_name, 'character')
             msg = await interaction.followup.send(embed=embed, view=view)
